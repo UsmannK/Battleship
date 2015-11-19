@@ -13,6 +13,22 @@ public class PlayerClient implements Client{
 
 	@Override
 	public void triggerTurn() {
+		Scanner sc = new Scanner(System.in);
+		
+		System.out.println("Your turn!");
+		int[][] board = game.getOwnBoard(this);
+		int[][] oppBoard = game.getHitBoard(this);
+		System.out.println("Opponent's board:");
+		printOppBoard(oppBoard);
+		System.out.println("Your board:");
+		printOwnBoard(board);
+		
+		String entry;
+		do{
+			System.out.println("Pick a spot to attack");
+			System.out.print("Enter a cell in the form A,1: ");
+			entry = sc.nextLine();
+		}while(!validateHit(entry, board));
 		
 	}
 	
@@ -23,33 +39,75 @@ public class PlayerClient implements Client{
 		System.out.println("Place Ships");
 		for(int length : this.SHIP_LENGTHS) {
 			int[][] board = game.getOwnBoard(this);
-			System.out.print("  ");
-			for(char ch = 'A'; ch <= 'E'; ch++) {
-				System.out.print(ch + " ");
-			}
-			System.out.println();
-			for(int i = 0; i < board.length; i++) {
-				System.out.print(i + " ");
-				for(int j : board[i]) {
-					if(j == -1)
-						System.out.print("- ");
-					else
-						System.out.print("s ");
-				}
-				System.out.println();
-			}
+			printOwnBoard(board);
 			String entry;
 			do{
 				System.out.printf("Place a ship of length %d\n", length);
 				System.out.print("Enter a cell in the form A,1,d (3rd value is direction. Either d,u,l, or r): ");
 				entry = sc.nextLine();
-			}while(!validateEntry(entry, board, length));
+			}while(!validateShipPlacement(entry, board, length));
 		}
 		sc.close();
 	}
 	
+	private boolean validateHit(String entry, int[][] hitboard) {
+		
+		if(!Pattern.matches("^[A-E],[0-4]$", entry)) {
+				System.out.println("Invalid cell\n");
+				return false;
+		}
+		
+		String[] sections = entry.split(",");
+		int row = Integer.parseInt(sections[1]);
+		int col = entry.charAt(0) - 'A';
+		
+		return hitboard[row][col] == -1;
+	}
+	
+	private void printOwnBoard(int[][] board) {
+
+		System.out.print("\n  ");
+		for(char ch = 'A'; ch <= 'E'; ch++) {
+			System.out.print(ch + " ");
+		}
+		System.out.println();
+		for(int i = 0; i < board.length; i++) {
+			System.out.print(i + " ");
+			for(int j : board[i]) {
+				if(j == -1)
+					System.out.print("- ");
+				else if(j == 0)
+					System.out.print("s ");
+				else if(j == 1)
+					System.out.print("X ");
+			}
+			System.out.println("\n");
+		}
+	}
+	
+	private void printOppBoard(int[][] board) {
+
+		System.out.print("\n  ");
+		for(char ch = 'A'; ch <= 'E'; ch++) {
+			System.out.print(ch + " ");
+		}
+		System.out.println();
+		for(int i = 0; i < board.length; i++) {
+			System.out.print(i + " ");
+			for(int j : board[i]) {
+				if(j == -1)
+					System.out.print("- ");
+				else if(j == 1)
+					System.out.print("X ");
+				else if(j == 2)
+					System.out.print("M ");
+			}
+			System.out.println("\n");
+		}
+	}
+	
 	//Validates initial cell and prompts for further input accordingly
-	private boolean validateEntry(String entry, int[][] board, int length) {
+	private boolean validateShipPlacement(String entry, int[][] board, int length) {
 		length -= 1;
 		
 		if(!Pattern.matches("^[A-E],[0-4],[dulr]$", entry)) {
