@@ -9,11 +9,17 @@ public class BattleshipGame {
 	
 	//initializes board
 	public BattleshipGame() {
-		for(Board brd : boards) {
-			brd = new Board();
-		}
+		boards[0] = new Board();
+		boards[1] = new Board();
 		numClients = 0;
 		curTurn = 0;
+	}
+	
+	public void startGame() {
+		if(numClients != 2)
+			return;
+		clients[0].setUpShips();
+		clients[1].setUpShips();
 	}
 	
 	//returns true for success, false for failure
@@ -56,9 +62,9 @@ public class BattleshipGame {
 	//Return the status of your board
 	public int[][] getOwnBoard(Client client) {
 		if(client.equals(clients[0]))
-			return boards[1].getBoard();
-		else if(client.equals(clients[1]))
 			return boards[0].getBoard();
+		else if(client.equals(clients[1]))
+			return boards[1].getBoard();
 		else return null;
 	}
 	
@@ -71,6 +77,15 @@ public class BattleshipGame {
 		else return null;
 	}
 	
+	public void addShip(Client client, int x1, int y1, int x2, int y2) {
+		if(client.equals(clients[0]))
+			boards[0].addShip(x1,y1,x2,y2);
+		else if(client.equals(clients[1]))
+			boards[1].addShip(x1,y1,x2,y2);
+		else
+			System.out.println("Iv client?");
+	}
+	
 	
 	private class Board {
 		private final static int EMPTY = -1;
@@ -81,16 +96,28 @@ public class BattleshipGame {
 		
 		int[][] board;
 		int[][] hitBoard;
+		int hits;
 		
 		public Board() {
 			board = new int[5][5];
 			hitBoard = new int[5][5];
+			
+			hits = 0;
 			
 			for(int[] row : board) {
 				for(int cell = 0; cell < row.length; cell++) {
 					row[cell] = EMPTY;
 				}
 			}
+		}
+		
+		public void addShip(int x1, int y1, int x2, int y2) {
+			System.out.printf("%d %d %d %d", x1,y1,x2,y2);
+			for(int i = x1; i <= x2; i++)
+				for(int j = y1; j <= y2; j++) {
+					System.out.printf("I'm the board: (%d,%d)\n", i, j);
+					board[i][j] = SHIP;
+				}
 		}
 		
 		public int attack(int row, int col) {
@@ -101,6 +128,7 @@ public class BattleshipGame {
 				return MISS;
 			} else {
 				this.board[row][col] = HIT;
+				hits++;
 				return HIT;
 			}
 		}
